@@ -1,0 +1,28 @@
+name: Publish
+
+# Publishes to npm when a GitHub release is published (tag vX.Y.Z matching
+# package.json). Uses npm trusted publishing (OIDC): no npm token is stored
+# anywhere, and every version carries a provenance attestation that links it
+# to this repo and commit.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - name: Tag matches package.json
+        run: test "v$(node -p 'require("./package.json").version')" = "${GITHUB_REF_NAME}"
+      - run: npm ci
+      - run: npm publish --provenance --access public

@@ -1,0 +1,80 @@
+import * as p from "@clack/prompts";
+import { api } from "../api.ts";
+import { bold, cyan, dim, fail, green, handleError, red, sleep, unwrap } from "../util.ts";
+
+/** Runs the deploy workflow (migrations → Cloud Run) and follows it. */
+export async function deploy(slug: string) {
+	const s = p.spinner();
+	try {
+		const { since } = await api<{ since: string }>(`/api/cli/apps/${slug}/deploy`, { method: "POST" });
+		s.start("Esperando a que GitHub Actions arranque el deploy");
+		type Status = {
+			run: { url: string; status: string; conclusion: string | null } | null;
+			jobs: { name: string; status: string; conclusion: string | null }[];
+		};
+		let shownUrl = false;
+		while (true) {
+			await sleep(5_000);
+			const { run, jobs } = await api<Status>(`/api/cli/apps/${slug}/deploy?since=${encodeURIComponent(since)}`);
+			if (!run) continue;
+			if (!shownUrl) {
+				s.stop(`Deploy en marcha: ${run.url}`);
+				s.start("Desplegando");
+				shownUrl = true;
+			}
+			const active = jobs.find((j) => j.status !== "completed");
+			s.message(active ? `Corriendo: ${active.name}` : "Terminando");
+			if (run.status === "completed") {
+				if (run.conclusion === "success") s.stop(green("✓ Desplegado"));
+				else {
+					s.error(red(`El deploy terminó con: ${run.conclusion}`));
+					fail("Revisa el log del workflow.", run.url);
+				}
+				return;
+			}
+		}
+	} catch (e) {
+		s.clear();
+		handleError(e);
+	}
+}
+
+export async function resetOwner(slug: string) {
+	const ok = unwrap(
+		await p.confirm({ message: `¿Generar una contraseña nueva para el owner de ${slug}? La actual deja de servir.`, initialValue: false })
+	);
+	if (!ok) return;
+	try {
+		const { email, password } = await api<{ email: string; password: string }>(
+			`/api/cli/apps/${slug}/reset-owner`,
+			{ method: "POST" }
+		);
+		p.note(
+			`${bold("Correo:")}     ${email}\n${bold("Contraseña:")} ${cyan(password)}\n\n` +
+				dim("Se muestra solo esta vez. La cambia en su próximo inicio de sesión."),
+			"Owner"
+		);
+	} catch (e) {
+		handleError(e);
+	}
+}
+
+export async function destroy(slug: string, opts: { yes: boolean }) {
+	p.log.warn(
+		`Esto elimina el servicio de Cloud Run, los secretos y el proyecto de Supabase ${bold("con toda su base de datos")}.\n` +
+			"El repo se archiva (queda de solo lectura, no se borra)."
+	);
+	if (!opts.yes) {
+		const typed = unwrap(await p.text({ message: `Escribe ${bold(slug)} para confirmar` }));
+		if (typed !== slug) fail("No coincide; no se eliminó nada.");
+	}
+	const s = p.spinner();
+	s.start(`Eliminando ${slug}`);
+	try {
+		await api(`/api/cli/apps/${slug}/destroy`, { method: "POST", body: { confirm: slug } });
+		s.stop(green(`✓ ${slug} eliminada`));
+	} catch (e) {
+		s.error("No se pudo eliminar");
+		handleError(e);
+	}
+}
