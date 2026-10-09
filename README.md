@@ -23,6 +23,7 @@ repo y deja el `.env` listo. Si se interrumpe, vuelve a correrlo y retoma donde 
 | `assembly deploy <nombre>` | Migra y despliega `main` |
 | `assembly secrets set\|list\|unset <nombre> [NOMBRE]` | Llaves de APIs externas en producción (Secret Manager → Cloud Run) |
 | `assembly logs <nombre> [-f] [--errors] [--since 2h]` | Logs de producción de la app |
+| `assembly email <nombre>` | Activa el correo (invitaciones, restablecer contraseña, `sendEmail()`); reaplica plantillas |
 | `assembly types <nombre>` | Regenera `src/lib/types/database.ts` desde la base real (sin Docker) |
 | `assembly reset-owner <nombre>` | Nueva contraseña temporal para el owner |
 | `assembly destroy <nombre>` | Elimina Cloud Run, Supabase y secretos; archiva el repo |

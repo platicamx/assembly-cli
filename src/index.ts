@@ -9,6 +9,7 @@ import { deploy, destroy, resetOwner } from "./commands/manage.ts";
 import { list, status } from "./commands/status.ts";
 import { logs } from "./commands/logs.ts";
 import { types } from "./commands/types.ts";
+import { email } from "./commands/email.ts";
 import { secretsList, secretsSet, secretsUnset } from "./commands/secrets.ts";
 import { checkForUpdate } from "./update-check.ts";
 import { bold, cyan, dim, fail } from "./util.ts";
@@ -137,6 +138,14 @@ const COMMANDS: Command[] = [
 				follow: !!v.follow,
 				limit: str(v.limit),
 			}),
+	},
+	{
+		name: "email",
+		group: "Apps",
+		usage: "assembly email <app>",
+		summary: "Activa o actualiza el correo de la app",
+		examples: ["assembly email mi-app   # también después de cambiar supabase/templates/"],
+		run: (a) => email(arg(a, 0, "assembly email <app>")),
 	},
 	{
 		name: "types",
