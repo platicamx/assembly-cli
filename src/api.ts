@@ -40,7 +40,10 @@ export async function api<T>(path: string, { method = "GET", body, auth = true, 
 		data = text ? JSON.parse(text) : null;
 	} catch {}
 	if (!res.ok) {
-		const message = (data as { message?: string } | null)?.message ?? `Error ${res.status}`;
+		let message = (data as { message?: string } | null)?.message ?? `Error ${res.status}`;
+		if (res.status >= 500 && /^internal error$/i.test(message)) {
+			message = "El servicio de Assembly tuvo un error inesperado. Intenta de nuevo en un momento; si se repite, avísale al equipo.";
+		}
 		throw new ApiError(res.status, message);
 	}
 	return data as T;
