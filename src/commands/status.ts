@@ -8,6 +8,7 @@ export function printApp(app: App) {
 		`${bold("Repo:")}      ${app.repoUrl ?? "—"}`,
 		`${bold("Supabase:")}  ${app.supabaseDashboard ?? "—"}`,
 		`${bold("Empresa:")}   ${app.company}  ${dim(`· owner ${app.ownerEmail}`)}`,
+		`${bold("Correo:")}    ${app.emailFrom ?? dim(`sin configurar · assembly email ${app.slug}`)}`,
 		dim(`Creada por ${app.createdBy} el ${app.createdAt.slice(0, 10)}`),
 	];
 	if (app.deployRunUrl) lines.splice(3, 0, `${bold("Deploy:")}    ${app.deployRunUrl}`);

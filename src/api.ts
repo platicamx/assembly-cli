@@ -61,6 +61,7 @@ export type App = {
 	supabaseDashboard: string | null;
 	deployRunUrl: string | null;
 	ownerEmail: string;
+	emailFrom: string | null;
 	company: string;
 	createdBy: string;
 	createdAt: string;
