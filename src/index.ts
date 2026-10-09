@@ -8,6 +8,7 @@ import { login, logout, whoami } from "./commands/login.ts";
 import { deploy, destroy, resetOwner } from "./commands/manage.ts";
 import { list, status } from "./commands/status.ts";
 import { logs } from "./commands/logs.ts";
+import { types } from "./commands/types.ts";
 import { secretsList, secretsSet, secretsUnset } from "./commands/secrets.ts";
 import { checkForUpdate } from "./update-check.ts";
 import { bold, cyan, dim, fail } from "./util.ts";
@@ -138,6 +139,15 @@ const COMMANDS: Command[] = [
 			}),
 	},
 	{
+		name: "types",
+		group: "Apps",
+		usage: "assembly types <app>",
+		summary: "Regenera los tipos de la base de datos",
+		options: [["--out <archivo>", "Destino (por defecto src/lib/types/database.ts)"]],
+		examples: ["assembly types mi-app"],
+		run: (a, v) => types(arg(a, 0, "assembly types <app>"), { out: str(v.out) }),
+	},
+	{
 		name: "reset-owner",
 		group: "Apps",
 		usage: "assembly reset-owner <nombre>",
@@ -214,6 +224,7 @@ try {
 			since: { type: "string" },
 			errors: { type: "boolean" },
 			limit: { type: "string" },
+			out: { type: "string" },
 		},
 	});
 } catch (e) {
