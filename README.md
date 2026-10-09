@@ -21,8 +21,13 @@ repo y deja el `.env` listo. Si se interrumpe, vuelve a correrlo y retoma donde 
 | `assembly status <nombre>` | Estado, URL y enlaces |
 | `assembly env pull <nombre>` | `.env` con tu llave personal de Supabase (revoca la anterior) |
 | `assembly deploy <nombre>` | Migra y despliega `main` |
+| `assembly secrets set\|list\|unset <nombre> [NOMBRE]` | Llaves de APIs externas en producción (Secret Manager → Cloud Run) |
+| `assembly logs <nombre> [-f] [--errors] [--since 2h]` | Logs de producción de la app |
 | `assembly reset-owner <nombre>` | Nueva contraseña temporal para el owner |
 | `assembly destroy <nombre>` | Elimina Cloud Run, Supabase y secretos; archiva el repo |
+
+Los comandos funcionan igual para personas y agentes: fuera de una terminal interactiva (agentes, CI)
+la salida es texto plano, sin animaciones, y `secrets set` lee el valor de stdin.
 
 ## Seguridad
 

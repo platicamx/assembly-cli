@@ -5,7 +5,7 @@ import * as p from "@clack/prompts";
 import { api } from "../api.ts";
 import { apiUrl, clearCredentials, loadCredentials, saveCredentials } from "../config.ts";
 import { banner } from "../banner.ts";
-import { bold, cyan, dim, fail, handleError, openBrowser, unwrap } from "../util.ts";
+import { bold, cyan, dim, fail, handleError, openBrowser, unwrap, spinner } from "../util.ts";
 
 const b64url = (buf: Buffer) => buf.toString("base64url");
 
@@ -64,7 +64,7 @@ export async function login(opts: { api?: string }) {
 		});
 	}).catch((e: Error) => fail(e.message));
 
-	const s = p.spinner();
+	const s = spinner();
 	s.start("Terminando el inicio de sesión");
 	try {
 		const result = await api<{ token: string; email: string; expiresAt: string }>("/api/cli/token", {

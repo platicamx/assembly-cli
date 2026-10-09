@@ -68,3 +68,20 @@ export function openBrowser(url: string) {
 }
 
 export const exists = (path: string) => existsSync(path);
+
+/**
+ * Spinner that degrades for agents and CI: outside a TTY it prints one clean
+ * line per start/stop instead of animation frames.
+ */
+export function spinner() {
+	if (process.stdout.isTTY) return p.spinner();
+	return {
+		start: (msg?: string) => msg && console.log(`… ${msg}`),
+		message: (_msg?: string) => {},
+		stop: (msg?: string) => msg && console.log(msg),
+		error: (msg?: string) => msg && console.error(`✗ ${msg}`),
+		cancel: (msg?: string) => msg && console.error(msg),
+		clear: () => {},
+		isCancelled: false,
+	};
+}

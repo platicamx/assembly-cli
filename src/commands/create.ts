@@ -4,7 +4,7 @@ import * as p from "@clack/prompts";
 import { api, ApiError, type App } from "../api.ts";
 import { banner } from "../banner.ts";
 import { loadCredentials } from "../config.ts";
-import { bold, cyan, dim, exists, fail, green, handleError, hasCommand, red, run, sleep, unwrap } from "../util.ts";
+import { bold, cyan, dim, exists, fail, green, handleError, hasCommand, red, run, sleep, unwrap, spinner } from "../util.ts";
 import { printApp } from "./status.ts";
 
 export type CreateOptions = {
@@ -184,7 +184,7 @@ export async function create(slugArg: string | undefined, opts: CreateOptions) {
 	const { app: finished, ownerPassword } = await provision(app!);
 
 	if (opts.clone && finished.cloneUrl) {
-		const s = p.spinner();
+		const s = spinner();
 		s.start("Clonando el repo");
 		try {
 			if (exists(dir)) throw new Error(`ya existe ${dir}`);
@@ -220,7 +220,7 @@ const seconds = (ms: number) => (ms < 60_000 ? `${Math.round(ms / 1000)}s` : `${
 
 /** Drives the server-side state machine, one step per request. Ctrl+C is safe: re-run to resume. */
 async function provision(app: App) {
-	const s = p.spinner();
+	const s = spinner();
 	let ownerPassword: string | null | undefined;
 	const doneSteps = new Set(app.steps.filter((x) => x.status === "done").map((x) => x.name));
 	const current = (a: App) => a.steps.find((x) => x.status !== "done");

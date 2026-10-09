@@ -7,6 +7,8 @@ import { envPull } from "./commands/env.ts";
 import { login, logout, whoami } from "./commands/login.ts";
 import { deploy, destroy, resetOwner } from "./commands/manage.ts";
 import { list, status } from "./commands/status.ts";
+import { logs } from "./commands/logs.ts";
+import { secretsList, secretsSet, secretsUnset } from "./commands/secrets.ts";
 import { checkForUpdate } from "./update-check.ts";
 import { bold, cyan, dim, fail } from "./util.ts";
 import { VERSION } from "./version.ts";
@@ -95,6 +97,47 @@ const COMMANDS: Command[] = [
 		run: (a) => deploy(arg(a, 0, "assembly deploy <nombre>")),
 	},
 	{
+		name: "secrets",
+		group: "Apps",
+		usage: "assembly secrets <set|list|unset> <app> [NOMBRE]",
+		summary: "Llaves de la app en producción (APIs externas)",
+		options: [["-y, --yes", "unset: no pedir confirmación"]],
+		examples: [
+			"assembly secrets set mi-app OPENAI_API_KEY      # te pide el valor sin mostrarlo",
+			"assembly secrets list mi-app",
+			"assembly secrets unset mi-app OPENAI_API_KEY",
+			"pbpaste | assembly secrets set mi-app OPENAI_API_KEY   # desde el portapapeles",
+		],
+		run: (a, v) => {
+			const [sub, app, name, value] = a;
+			const usage = "assembly secrets <set|list|unset> <app> [NOMBRE]";
+			if (sub === "list" || sub === "ls") return secretsList(arg(a, 1, usage));
+			if (sub === "set") return secretsSet(arg(a, 1, usage), arg(a, 2, "assembly secrets set <app> NOMBRE"), value);
+			if (sub === "unset" || sub === "rm") return secretsUnset(arg(a, 1, usage), arg(a, 2, "assembly secrets unset <app> NOMBRE"), { yes: !!v.yes });
+			fail(app ? `Subcomando desconocido: ${sub}` : "Falta el subcomando.", `Uso: ${usage}`);
+		},
+	},
+	{
+		name: "logs",
+		group: "Apps",
+		usage: "assembly logs <app>",
+		summary: "Logs de producción (Cloud Run)",
+		options: [
+			["-f, --follow", "Seguir en vivo"],
+			["--since <30m|2h|1d>", "Desde hace cuánto (por defecto 1h)"],
+			["--errors", "Solo errores"],
+			["--limit <n>", "Máximo de líneas (por defecto 200)"],
+		],
+		examples: ["assembly logs mi-app -f", "assembly logs mi-app --errors --since 1d"],
+		run: (a, v) =>
+			logs(arg(a, 0, "assembly logs <app>"), {
+				since: str(v.since),
+				errors: !!v.errors,
+				follow: !!v.follow,
+				limit: str(v.limit),
+			}),
+	},
+	{
 		name: "reset-owner",
 		group: "Apps",
 		usage: "assembly reset-owner <nombre>",
@@ -167,6 +210,10 @@ try {
 			"no-clone": { type: "boolean" },
 			force: { type: "boolean" },
 			yes: { type: "boolean", short: "y" },
+			follow: { type: "boolean", short: "f" },
+			since: { type: "string" },
+			errors: { type: "boolean" },
+			limit: { type: "string" },
 		},
 	});
 } catch (e) {

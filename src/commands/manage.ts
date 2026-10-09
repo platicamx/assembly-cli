@@ -1,10 +1,10 @@
 import * as p from "@clack/prompts";
 import { api } from "../api.ts";
-import { bold, cyan, dim, fail, green, handleError, red, sleep, unwrap } from "../util.ts";
+import { bold, cyan, dim, fail, green, handleError, red, sleep, unwrap, spinner } from "../util.ts";
 
 /** Runs the deploy workflow (migrations → Cloud Run) and follows it. */
 export async function deploy(slug: string) {
-	const s = p.spinner();
+	const s = spinner();
 	try {
 		const { since } = await api<{ since: string }>(`/api/cli/apps/${slug}/deploy`, { method: "POST" });
 		s.start("Esperando a que GitHub Actions arranque el deploy");
@@ -68,7 +68,7 @@ export async function destroy(slug: string, opts: { yes: boolean }) {
 		const typed = unwrap(await p.text({ message: `Escribe ${bold(slug)} para confirmar` }));
 		if (typed !== slug) fail("No coincide; no se eliminó nada.");
 	}
-	const s = p.spinner();
+	const s = spinner();
 	s.start(`Eliminando ${slug}`);
 	try {
 		await api(`/api/cli/apps/${slug}/destroy`, { method: "POST", body: { confirm: slug } });
