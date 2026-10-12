@@ -5,7 +5,7 @@ import { banner } from "./banner.ts";
 import { create } from "./commands/create.ts";
 import { envPull } from "./commands/env.ts";
 import { login, logout, whoami } from "./commands/login.ts";
-import { deploy, destroy, resetOwner } from "./commands/manage.ts";
+import { deploy, destroy, isolate, resetOwner } from "./commands/manage.ts";
 import { list, status } from "./commands/status.ts";
 import { logs } from "./commands/logs.ts";
 import { types } from "./commands/types.ts";
@@ -97,6 +97,13 @@ const COMMANDS: Command[] = [
 		usage: "assembly deploy <nombre>",
 		summary: "Migra y despliega main a Cloud Run",
 		run: (a) => deploy(arg(a, 0, "assembly deploy <nombre>")),
+	},
+	{
+		name: "isolate",
+		group: "Apps",
+		usage: "assembly isolate <nombre>",
+		summary: "Da a una app existente sus propias identidades en GCP",
+		run: (a) => isolate(arg(a, 0, "assembly isolate <nombre>")),
 	},
 	{
 		name: "secrets",

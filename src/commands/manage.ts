@@ -59,6 +59,28 @@ export async function resetOwner(slug: string) {
 	}
 }
 
+/** Moves an app created before per-app identities onto its own runtime and deployer. */
+export async function isolate(slug: string) {
+	const s = spinner();
+	s.start(`Dándole identidades propias a ${slug} (puede tardar un par de minutos)`);
+	try {
+		const res = await api<{ runtime: string; deployer: string; secrets: string[] }>(
+			`/api/cli/apps/${slug}/isolate`,
+			{ method: "POST" }
+		);
+		s.stop(green(`✓ ${slug} aislada`));
+		p.note(
+			`${bold("Corre como:")}     ${res.runtime}\n${bold("Despliega con:")}  ${res.deployer}\n` +
+				`${bold("Secretos:")}       ${res.secrets.length} (solo esta app los puede leer)\n\n` +
+				dim("Solo el repo de esta app puede usar su deployer."),
+			"Identidades"
+		);
+	} catch (e) {
+		s.error("No se pudo aislar");
+		handleError(e);
+	}
+}
+
 export async function destroy(slug: string, opts: { yes: boolean }) {
 	p.log.warn(
 		`Esto elimina el servicio de Cloud Run, los secretos y el proyecto de Supabase ${bold("con toda su base de datos")}.\n` +

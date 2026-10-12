@@ -25,6 +25,7 @@ repo y deja el `.env` listo. Si se interrumpe, vuelve a correrlo y retoma donde 
 | `assembly logs <nombre> [-f] [--errors] [--since 2h]` | Logs de producción de la app |
 | `assembly email <nombre>` | Activa el correo (invitaciones, restablecer contraseña, `sendEmail()`); reaplica plantillas |
 | `assembly types <nombre>` | Regenera `src/lib/types/database.ts` desde la base real (sin Docker) |
+| `assembly isolate <nombre>` | Mueve una app creada antes de v0.5 a sus propias identidades de GCP |
 | `assembly reset-owner <nombre>` | Nueva contraseña temporal para el owner |
 | `assembly destroy <nombre>` | Elimina Cloud Run, Supabase y secretos; archiva el repo |
 
@@ -38,6 +39,8 @@ la salida es texto plano, sin animaciones, y `secrets set` lee el valor de stdin
 - `assembly login` usa un código de un solo uso con PKCE y una redirección a `127.0.0.1`. El token
   se guarda en `~/.config/assembly/credentials.json` con permisos `600`, vence en 60 días y se
   revoca con `assembly logout`.
+- Cada app corre con su propia identidad de GCP (`run-<app>`) y solo ella lee sus secretos. Solo el
+  repo de la app puede desplegarla (`ci-<app>`, por Workload Identity Federation).
 - Cada `.env` lleva una llave secreta de Supabase **personal**: `env pull` revoca la anterior, y un
   admin puede revocar cualquiera sin afectar a los demás.
 - Dependencias mínimas (`@clack/prompts`). Las versiones se publican desde GitHub Actions con
