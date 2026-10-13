@@ -10,6 +10,7 @@ import { list, status } from "./commands/status.ts";
 import { logs } from "./commands/logs.ts";
 import { types } from "./commands/types.ts";
 import { email } from "./commands/email.ts";
+import { mcp } from "./commands/mcp.ts";
 import { secretsList, secretsSet, secretsUnset } from "./commands/secrets.ts";
 import { checkForUpdate } from "./update-check.ts";
 import { bold, cyan, dim, fail } from "./util.ts";
@@ -153,6 +154,15 @@ const COMMANDS: Command[] = [
 		summary: "Activa o actualiza el correo de la app",
 		examples: ["assembly email mi-app   # también después de cambiar supabase/templates/"],
 		run: (a) => email(arg(a, 0, "assembly email <app>")),
+	},
+	{
+		name: "mcp",
+		aliases: ["agents"],
+		group: "Apps",
+		usage: "assembly mcp <app>",
+		summary: "MCP: activa el acceso de agentes y muestra cómo conectar Claude, Cursor, Codex…",
+		examples: ["assembly mcp mi-app"],
+		run: (a) => mcp(arg(a, 0, "assembly mcp <app>")),
 	},
 	{
 		name: "types",
